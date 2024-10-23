@@ -3,6 +3,8 @@ require('dotenv').config();
 
 const Hapi = require('@hapi/hapi');
 const loadModel = require('../services/loadModel');
+const routes = require('..server/routes');
+const InputError = require('../exceptions/InputError');
 
 const init = async () => {
 
@@ -24,15 +26,15 @@ const init = async () => {
     server.ext('onPreResponse', function (request, h) {
         const response = request.response;
 
-        // if (response instanceof InputError) {
-        //     const newResponse = h.response({
-        //         status: 'fail',
-        //         message: `${response.message} Silahkan gunakan foto lain`
-        //     })
+        if (response instanceof InputError) {
+            const newResponse = h.response({
+                status: 'fail',
+                message: `${response.message} Silahkan gunakan foto lain`
+            })
 
-        //     newResponse.code(response.statusCode);
-        //     return newResponse;
-        // }
+            newResponse.code(response.statusCode);
+            return newResponse;
+        }
 
         if (response.isBoom) {
             const newResponse = h.response({
