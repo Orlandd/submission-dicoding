@@ -1,6 +1,8 @@
 'use strict';
+require('dotenv').config();
 
 const Hapi = require('@hapi/hapi');
+const loadModel = require('../services/loadModel');
 
 const init = async () => {
 
@@ -16,8 +18,33 @@ const init = async () => {
 
     server.route(routes);
 
+    const model = await loadModel();
+    server.app.model = model;
+
     server.ext('onPreResponse', function (request, h) {
-        const response = 
+        const response = request.response;
+
+        // if (response instanceof InputError) {
+        //     const newResponse = h.response({
+        //         status: 'fail',
+        //         message: `${response.message} Silahkan gunakan foto lain`
+        //     })
+
+        //     newResponse.code(response.statusCode);
+        //     return newResponse;
+        // }
+
+        if (response.isBoom) {
+            const newResponse = h.response({
+                status: 'fail',
+                message: response.message
+            })
+
+            newResponse.code(response.statusCode)
+            return newResponse;
+        }
+
+        return h.continue;
     })
 
     await server.start();
