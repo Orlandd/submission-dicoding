@@ -1,37 +1,35 @@
-const  tf  = require("@tensorflow/tfjs-node");
+const tf = require("@tensorflow/tfjs-node");
+const InputError = require("../exceptions/InputError");
 
 async function predictClassification(model, image) {
-    
-    try {
-        const tensor = tf.node
-        .decodeJpeg(image)
-        .resizeNearestNeighbor([224,224])
-        .expandDims()
-        .toFloat()
-    
-        const predition = model.predict(tensor);
-        const score = await predition.data()
-        const confidanceScore = Math.max(...score) * 100;
+  try {
+    const tensor = tf.node
+      .decodeJpeg(image)
+      .resizeNearestNeighbor([224, 224])
+      .expandDims(0)
+      .toFloat();
 
-        const classes = ['Cancer', 'Non-cancer'];
+    const prediction = model.predict(tensor);
+    const classes = ["Cancer", "Non-cancer"];
 
-        const classResult = tf.argMax(predition, 1).dataSync()[0]
-        const label = classes[classResult];
+    const classResult = tf.argMax(prediction, 1).dataSync()[0];
+    const label = classes[classResult];
 
-        let suggestion;
+    console.log(label);
 
-        if (label === 'Cancer') {
-            suggestion = 'Segera periksa ke dokter!'
-        }
-
-        if (label === 'Non-Cancer') {
-            suggestion = 'Penyakit kanker tidak terdeteksi.'
-        }
-
-        return { confidanceScore, label, suggestion};
-    } catch(error) {
-        throw new InputError(`Terjadi kesalahan input: ${error.message}`)
+    let suggestion;
+    if (label === "Cancer") {
+      suggestion = "Segera periksa ke dokter!";
+    } else if (label === "Non-cancer") {
+      suggestion = "Penyakit kanker tidak terdeteksi.";
     }
+
+    return { label, suggestion };
+  } catch (error) {
+    throw new InputError(
+      `Terjadi kesalahan saat memproses gambar: ${error.message}`
+    );
+  }
 }
 
 module.exports = predictClassification;
