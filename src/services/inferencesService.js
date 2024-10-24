@@ -10,10 +10,20 @@ async function predictClassification(model, image) {
       .toFloat();
 
     const prediction = model.predict(tensor);
+
+    // Mengasumsikan model memberikan output tunggal untuk probabilitas "Cancer"
+    const cancerProbability = prediction.dataSync()[0]; // Ambil nilai probabilitas untuk Cancer
+    const nonCancerProbability = 1 - cancerProbability; // Hitung probabilitas untuk Non-cancer
+
     const classes = ["Cancer", "Non-cancer"];
 
-    const classResult = tf.argMax(prediction, 1).dataSync()[0];
-    const label = classes[classResult];
+    // Tentukan kelas berdasarkan probabilitas
+    let label;
+    if (cancerProbability >= 0.5) {
+      label = classes[0]; // Cancer
+    } else {
+      label = classes[1]; // Non-cancer
+    }
 
     console.log(label);
 

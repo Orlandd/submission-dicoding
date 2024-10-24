@@ -41,7 +41,9 @@ const init = async () => {
     if (response.isBoom) {
       const newResponse = h.response({
         status: "fail",
-        message: response.output.payload.message || "Terjadi kesalahan",
+        message:
+          response.output.payload.message ||
+          "Terjadi kesalahan dalam melakukan prediksi",
       });
 
       // Ensure statusCode is always an integer, default to 500 if undefined
