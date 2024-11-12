@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Layanan untuk aplikasi Node.js
+  nodejs-app:
+    build: .
+    container_name: hapijs_predict-cancer
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysql
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: cancer
+    networks:
+      - app-network
+
+  # Layanan untuk MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: my-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: cancer
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+    ports:
+      - "3306:3306"
+
+# Definisikan jaringan untuk container
+networks:
+  app-network:
+    driver: bridge
+
+# Volume untuk menyimpan data MySQL
+volumes:
+  mysql-data:
